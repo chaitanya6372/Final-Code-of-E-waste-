@@ -6,31 +6,6 @@ from PIL import Image
 from IPython.display import display, HTML
 from google.colab import files
 
-# Sample images for each category (base64 encoded)
-SAMPLE_IMAGES = {
-    'Battery': 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AcxV9TpaIVBzuIOGSoThZERRy1CkWoEGqFVh1MbvqhNGlIUlwcBdeCgx+LVQcXZ10dXAVB8APE0clJ0UVK/F9SaBHjwXE/3t173L0DhGaVqWbPOKBqlpFOxMVcflUMvCKIIQxhuispApiBl8osviuxompP4Or7ujR0Vfkjf0+Rq2ZJLBALxBmm6RbTgvHkdt6xVzwkkgr4jqx959RT4h3jRY5uumjBY6Bnip0eTfy2K6rZLHWU1Ti0WOtryRODHSVDKBXhyYVEwXdVX7VhMV2wOy53xOHmVpEUiCcULFMKGBqxVCDFRpsxKIIq1U+9x297bKztD5S68JKYHg8dAv2w0K7v72bZb9Iu+jQG+n6KW9IPWHuGLVGXrfwPztOTrE0K95YbXH0DgK6jTXT8Tt5SnKbQC6nXiT7caYEDMKdD8NZM8lf7PZqVLHYC/ASQrV2TwA+m4g9jtQPfb8DtPb38Dg9d2voz9hZ4Akf3CN9taPgB4O7q922//nOm7/QA/QWK+bquE9gAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+cCAQIMALpPsbwAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAXUlEQVQ4y2NgGAXDFmzatMmKAQX8B9L/QZzNmzdvYKgYgAGUAYw0MBYfgIGBgeE/AwPDfxLFGWlpAQMDAwMjLQzHZxMTiWKkAkaafQpQ2AgdBaNgFAwLwAgICAAAE7MPVjrJ48AAAAAASUVORK5CYII=',
-    'Cable': 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AcxV9TpaIVBzuIOGSoThZERRy1CkWoEGqFVh1MbvqhNGlIUlwcBdeCgx+LVQcXZ10dXAVB8APE0clJ0UVK/F9SaBHjwXE/3t173L0DhGaVqWbPOKBqlpFOxMVcflUMvCKIIQxhuispApiBl8osviuxompP4Or7ujR0Vfkjf0+Rq2ZJLBALxBmm6RbTgvHkdt6xVzwkkgr4jqx959RT4h3jRY5uumjBY6Bnip0eTfy2K6rZLHWU1Ti0WOtryRODHSVDKBXhyYVEwXdVX7VhMV2wOy53xOHmVpEUiCcULFMKGBqxVCDFRpsxKIIq1U+9x297bKztD5S68JKYHg8dAv2w0K7v72bZb9Iu+jQG+n6KW9IPWHuGLVGXrfwPztOTrE0K95YbtH0DgK6jTXT8Tt5SnKbQC6nXiT7caYEDMKdD8NZM8lf7PZqVLHYC/ASQrV2TwA+m4g9jtQPfb8DtPb38Dg9d2voz9hZ4Akf3CN9taPgB4O7q922//nOm7/QA/QWK+bquE9gAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+cCAQIMALpPsbwAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAXElEQVQ4y2NgGAWjYBSMKMDIyMj4n4GB4T8J4jTRw8jIyPgfWcBIAwuQAROKRUzUsoiJgYGBgZGcT4GsByj+/z8DA8N/JJJBrAWM1DKcgYGBgRGZAKYxAOXuDzyqAAAAAElFTkSuQmCC',
-    'Electronics': 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AcxV9TpaIVBzuIOGSoThZERRy1CkWoEGqFVh1MbvqhNGlIUlwcBdeCgx+LVQcXZ10dXAVB8APE0clJ0UVK/F9SaBHjwXE/3t173L0DhGaVqWbPOKBqlpFOxMVcflUMvCKIIQxhuispApiBl8osviuxompP4Or7ujR0Vfkjf0+Rq2ZJLBALxBmm6RbTgvHkdt6xVzwkkgr4jqx959RT4h3jRY5uumjBY6Bnip0eTfy2K6rZLHWU1Ti0WOtryRODHSVDKBXhyYVEwXdVX7VhMV2wOy53xOHmVpEUiCcULFMKGBqxVCDFRpsxKIIq1U+9x297bKztD5S68JKYHg8dAv2w0K7v72bZb9Iu+jQG+n6KW9IPWHuGLVGXrfwPztOTrE0K95YbXH0DgK6jTXT8Tt5SnKbQC6nXiT7caYEDMKdD8NZM8lf7PZqVLHYC/ASQrV2TwA+m4g9jtQPfb8DtPb38Dg9d2voz9hZ4Akf3CN9taPgB4O7q922//nOm7/QA/QWK+bquE9gAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+cCAQIMALpPsbwAAAAZdEVYdENvbW1lbnQAQ3JlYXRleZD1WQAAAQBJREFUOMtjYKAUbNq0yYiBgeE/AwPDfyLEGKmpBwwQFv1nYGD4j0ucppoZGRkZ/zMwMPxHJpsiSY7fzM3/AQAK5h0ueZj/tQAAAABJRU5ErkJggg==',
-    'Appliance': 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AcxV9TpaIVBzuIOGSoThZERRy1CkWoEGqFVh1MbvqhNGlIUlwcBdeCgx+LVQcXZ10dXAVB8APE0clJ0UVK/F9SaBHjwXE/3t173L0DhGaVqWbPOKBqlpFOxMVcflUMvCKIIQxhuispApiBl8osviuxompP4Or7ujR0Vfkjf0+Rq2ZJLBALxBmm6RbTgvHkdt6xVzwkkgr4jqx959RT4h3jRY5uumjBY6Bnip0eTfy2K6rZLHWU1Ti0WOtryRODHSVDKBXhyYVEwXdVX7VhMV2wOy53xOHmVpEUiCcULFMKGBqxVCDFRpsxKIIq1U+9x297bKztD5S68JKYHg8dAv2w0K7v72bZb9Iu+jQG+n6KW9IPWHuGLVGXrfwPztOTrE0K95YbXH0DgK6jTXT8Tt5SnKbQC6nXiT7caYEDMKdD8NZM8lf7PZqVLHYC/ASQrV2TwA+m4g9jtQPfb8DtPb38Dg9d2voz9hZ4Akf3CN9taPgB4O7q922//nOm7/QA/QWK+bquE9gAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJncGAAAAAd0SU1FB+cCAQIMALpPsbwAAAAZdEVYdENvbW1lbnQAQ3JlYXRleZD1WQAAAQBJREFUOMtjYKAUbNq0yYiBgeE/AwPDfyLEGKmpBwwQFv1nYGD4j0ucppoZGRkZ/zMwMPxHJpsiSY7fzM3/AQAK5h0ueZj/tQAAAABJRU5ErkJggg=='
-}
-
-def show_sample_images():
-    """Display sample images for each category"""
-    display(HTML("<h3>Sample Images for Reference:</h3>"))
-    display(HTML("<div style='display:flex;flex-wrap:wrap;gap:20px;'>"))
-    
-    for category, img_data in SAMPLE_IMAGES.items():
-        display(HTML(f"""
-        <div style='border:1px solid #ddd;padding:10px;border-radius:5px;width:200px;'>
-            <h4>{category}</h4>
-            <img src="data:image/png;base64,{img_data}" style='max-width:180px;max-height:180px;'/>
-            <p style='font-size:12px;'>Example filename: my_{category.lower()}_image.jpg</p>
-        </div>
-        """))
-    
-    display(HTML("</div>"))
-    print("\nWhen uploading your own images, include the category name in the filename for better identification.")
-
 def load_data_from_string(csv_data):
     """Load data from a CSV string"""
     return pd.read_csv(io.StringIO(csv_data))
@@ -107,7 +82,6 @@ def create_visualizations(df, output_file='e_waste_visualizations.png'):
 
 def verify_image_colab():
     """Enhanced image verification with better matching"""
-    show_sample_images()
     print("\n\nPlease upload an image file (JPEG/PNG) for verification")
     uploaded = files.upload()
     
